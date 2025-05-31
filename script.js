@@ -115,11 +115,24 @@ faceMesh.setOptions({
   minTrackingConfidence: 0.5
 });
 
-faceMesh.onResults((results) => {
+// Initialize hands
+const hands = new Hands({
+  locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}` 
+});
+
+hands.setOptions({
+  maxNumHands: 2,
+  modelComplexity: 1,
+  minDetectionConfidence: 0.5,
+  minTrackingConfidence: 0.5
+});
+
+// Combine face mesh and hands results
+function combineResults(faceResults, handResults) {
   canvasCtx.clearRect(0, 0, canvasElement.width, canvasElement.height);
 
-  if (results.multiFaceLandmarks.length > 0) {
-    const landmarks = results.multiFaceLandmarks[0];
+  if (faceResults.multiFaceLandmarks && faceResults.multiFaceLandmarks.length > 0) {
+    const landmarks = faceResults.multiFaceLandmarks[0];
 
     const left = {
       x: landmarks[132].x * canvasElement.width,
@@ -157,23 +170,36 @@ faceMesh.onResults((results) => {
     if (currentMode === 'necklace' && necklaceImg && chinSmooth) {
       canvasCtx.drawImage(necklaceImg, chinSmooth.x - 100, chinSmooth.y, 200, 100);
     }
-
-    if (currentMode === 'ring' && ringImg && noseSmooth) {
-      canvasCtx.drawImage(ringImg, noseSmooth.x - 40, noseSmooth.y - 20, 80, 80);
-    }
-
-    if (currentMode === 'bracelet' && braceletImg) {
-      // Placeholder: simulate wrist position
-      canvasCtx.drawImage(braceletImg, 50, canvasElement.height - 150, 120, 120); // Left wrist
-      canvasCtx.drawImage(braceletImg, canvasElement.width - 170, canvasElement.height - 150, 120, 120); // Right wrist
-    }
   }
-});
+
+  if (handResults.multiHandLandmarks && handResults.multiHandLandmarks.length > 0) {
+    handResults.multiHandLandmarks.forEach(handLandmarks => {
+      const thumbTip = {
+        x: handLandmarks[4].x * canvasElement.width,
+        y: handLandmarks[4].y * canvasElement.height,
+      };
+      const wrist = {
+        x: handLandmarks[17].x * canvasElement.width,
+        y: handLandmarks[17].y * canvasElement.height,
+      };
+
+      if (currentMode === 'ring' && ringImg) {
+        canvasCtx.drawImage(ringImg, thumbTip.x - 20, thumbTip.y - 20, 40, 40);
+      }
+
+      if (currentMode === 'bracelet' && braceletImg) {
+        canvasCtx.drawImage(braceletImg, wrist.x - 50, wrist.y - 50, 100, 100);
+      }
+    });
+  }
+}
 
 // Start camera
 const camera = new Camera(videoElement, {
   onFrame: async () => {
-    await faceMesh.send({ image: videoElement });
+    const faceResults = await faceMesh.send({ image: videoElement });
+    const handResults = await hands.send({ image: videoElement });
+    combineResults(faceResults, handResults);
   },
   width: 1280,
   height: 720,
