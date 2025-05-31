@@ -9,7 +9,6 @@ let necklaceSrc = 'necklaces/necklace1.png';
 let earringImg = null;
 let necklaceImg = null;
 
-// Function to load an image
 function loadImage(src) {
   return new Promise((resolve) => {
     const img = new Image();
@@ -19,14 +18,12 @@ function loadImage(src) {
   });
 }
 
-// Initialize images
 async function initializeImages() {
   earringImg = await loadImage(earringSrc);
   necklaceImg = await loadImage(necklaceSrc);
 }
 initializeImages();
 
-// Function to change earring
 function changeEarring(filename) {
   earringSrc = `earrings/${filename}`;
   loadImage(earringSrc).then((img) => {
@@ -34,7 +31,6 @@ function changeEarring(filename) {
   });
 }
 
-// Function to change necklace
 function changeNecklace(filename) {
   necklaceSrc = `necklaces/${filename}`;
   loadImage(necklaceSrc).then((img) => {
@@ -42,50 +38,11 @@ function changeNecklace(filename) {
   });
 }
 
-// Function to select mode
 function selectMode(mode) {
   currentMode = mode;
   document.getElementById('earring-options').style.display = mode === 'earring' ? 'flex' : 'none';
   document.getElementById('necklace-options').style.display = mode === 'necklace' ? 'flex' : 'none';
 }
-
-// Function to dynamically insert jewelry options
-function insertJewelryOptions(jewelryType, containerId) {
-  const container = document.getElementById(containerId);
-
-  // Clear existing options
-  container.innerHTML = '';
-
-  // Generate buttons for each jewelry item
-  for (let i = 1; i <= 10; i++) {
-    const filename = `${jewelryType}${i}.png`;
-    const button = document.createElement('button');
-    const img = document.createElement('img');
-    img.src = `${jewelryType}s/${filename}`;
-    img.alt = `${jewelryType.charAt(0).toUpperCase()}${jewelryType.slice(1)} ${i}`;
-    img.style.width = '60px';
-    img.style.height = '60px';
-    img.style.borderRadius = '12px';
-    img.style.transition = 'border 0.2s ease, transform 0.2s ease';
-
-    button.appendChild(img);
-    button.onclick = () => {
-      if (jewelryType === 'earring') {
-        changeEarring(filename);
-      } else if (jewelryType === 'necklace') {
-        changeNecklace(filename);
-      }
-    };
-
-    container.appendChild(button);
-  }
-}
-
-// Initialize jewelry options
-document.addEventListener('DOMContentLoaded', () => {
-  insertJewelryOptions('earring', 'earring-options');
-  insertJewelryOptions('necklace', 'necklace-options');
-});
 
 // Initialize face mesh
 const faceMesh = new FaceMesh({
