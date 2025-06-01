@@ -2,7 +2,7 @@ const videoElement = document.getElementById('webcam');
 const canvasElement = document.getElementById('overlay');
 const canvasCtx = canvasElement.getContext('2d');
 
-let currentMode = 'earring';
+let currentMode = null; // Start with no mode selected
 let earringSrc = 'earrings/earring1.png';
 let necklaceSrc = 'necklaces/necklace1.png';
 
@@ -45,8 +45,12 @@ function changeNecklace(filename) {
 // Function to select mode
 function selectMode(mode) {
   currentMode = mode;
-  document.getElementById('earring-options').style.display = mode === 'earring' ? 'flex' : 'none';
-  document.getElementById('necklace-options').style.display = mode === 'necklace' ? 'flex' : 'none';
+
+  // Hide all options groups
+  document.querySelectorAll('.options-group').forEach(group => group.style.display = 'none');
+
+  // Show the selected mode's options group
+  document.getElementById(`${mode}-options`).style.display = 'flex';
 }
 
 // Function to dynamically insert jewelry options
@@ -142,6 +146,7 @@ faceMesh.onResults((results) => {
     const rightSmooth = smooth(rightEarPositions);
     const chinSmooth = smooth(chinPositions);
 
+    // Draw based on selected mode
     if (currentMode === 'earring' && earringImg) {
       if (leftSmooth) canvasCtx.drawImage(earringImg, leftSmooth.x - 60, leftSmooth.y, 100, 100);
       if (rightSmooth) canvasCtx.drawImage(earringImg, rightSmooth.x - 20, rightSmooth.y, 100, 100);
