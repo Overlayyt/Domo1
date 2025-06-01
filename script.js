@@ -61,7 +61,7 @@ function insertJewelryOptions(jewelryType, containerId) {
   container.innerHTML = '';
 
   // Generate buttons for each jewelry item
-  for (let i = 1; i <= 10; i++) {
+  for (let i = 1; i <= 12; i++) {
     const filename = `${jewelryType}${i}.png`;
     const button = document.createElement('button');
     const img = document.createElement('img');
